@@ -1,2 +1,41 @@
-# directorio-front
-Frontend del Directorio de Revistas Científicas del ONCTI
+# Directorio de Revistas del Observatorio Nacional de Ciencia, Tecnología e Innovación )ONCTI) (directorio-revistas)
+
+ Directorio de Revistas del Observatorio Nacional de Ciencia, Tecnología e Innovación )ONCTI)
+
+## Install the dependencies
+```bash
+yarn
+# or
+npm install
+```
+
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+```bash
+quasar dev
+```
+
+
+### Lint the files
+```bash
+yarn lint
+# or
+npm run lint
+```
+
+
+### Format the files
+```bash
+yarn format
+# or
+npm run format
+```
+
+
+
+### Build the app for production
+```bash
+quasar build
+```
+
+### Customize the configuration
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
