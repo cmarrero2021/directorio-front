@@ -73,6 +73,7 @@ let sessionTimeoutId = null;
 
 const checkSessionExpiration = () => {
   const expiration = LocalStorage.getItem("sessionExpiration");
+  // if (expiration && Date.now() > expiration - 10) {
   if (expiration && Date.now() > expiration) {
     Notify.create({
       message: "El tiempo de sesión ha expirado. Por favor, vuelva a ingresar.",
