@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { LocalStorage, Notify } from "quasar";
 import axios from "axios";
@@ -69,41 +69,78 @@ const hasPermission = (permissionName) => {
   return permissions.some((p) => p.name === permissionName);
 };
 
+let sessionTimeoutId = null;
+
+const checkSessionExpiration = () => {
+  const expiration = LocalStorage.getItem("sessionExpiration");
+  if (expiration && Date.now() > expiration) {
+    Notify.create({
+      message: "El tiempo de sesión ha expirado. Por favor, vuelva a ingresar.",
+      color: "negative",
+      position: "top",
+      timeout: 4000,
+    });
+    logout();
+  } else if (expiration) {
+    // Ejecutar logout 10 segundos antes del vencimiento real
+    let remaining = expiration - Date.now() - 10000;
+    if (remaining < 0) remaining = 0;
+    if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+    sessionTimeoutId = setTimeout(() => {
+      Notify.create({
+        message:
+          "El tiempo de sesión ha expirado. Por favor, vuelva a ingresar.",
+        color: "negative",
+        position: "top",
+        timeout: 4000,
+      });
+      logout();
+    }, remaining);
+  }
+};
+
 const logout = async () => {
+  const token = LocalStorage.getItem("token"); // <-- Obtén el token antes de limpiar
   try {
-    const token = LocalStorage.getItem("token");
-
-    // Llamar al endpoint de logout en el backend
-    await axios.post(
-      logoutUrl,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    // Limpiar el almacenamiento local
+    // Llama al endpoint de logout en el backend SOLO si hay token
+    if (token) {
+      await axios.post(
+        logoutUrl,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+  } catch (error) {
+    // No es necesario notificar aquí, ya que igual se limpiará el storage
+    console.error("Error al cerrar sesión:", error);
+  } finally {
+    // Ahora sí limpia el almacenamiento local y timeout
     LocalStorage.remove("token");
     LocalStorage.remove("permissions");
     LocalStorage.remove("sessionDuration");
     LocalStorage.remove("role");
+    LocalStorage.remove("sessionExpiration");
+    if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
 
     Notify.create({
       message: "Sesión cerrada correctamente",
       color: "positive",
     });
 
-    // Redirigir al login
     router.push("/login");
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    Notify.create({
-      message: "Error al cerrar sesión",
-      color: "negative",
-    });
   }
 };
+
+onMounted(() => {
+  checkSessionExpiration();
+});
+
+onBeforeUnmount(() => {
+  if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+});
 </script>

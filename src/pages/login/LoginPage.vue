@@ -50,6 +50,12 @@ const validateEmail = (email) => {
   return emailPattern.test(email);
 };
 
+// Solo guarda la expiración en LocalStorage
+const setSessionTimeout = (minutes) => {
+  const expiration = Date.now() + minutes * 60 * 1000;
+  LocalStorage.set("sessionExpiration", expiration);
+};
+
 const handleLogin = async () => {
   if (!email.value) {
     Notify.create({
@@ -78,12 +84,10 @@ const handleLogin = async () => {
     });
     return;
   }
-  ////////////////////////
   try {
     const response = await axios.post(
       loginUrl,
       {
-        // email: email.value,
         username: email.value,
         password: password.value,
       },
@@ -96,11 +100,12 @@ const handleLogin = async () => {
       }
     );
     if (response.data.message === "Inicio de sesión exitoso.") {
-      // Almacenar token, permisos, duración y roles en LocalStorage (opcional)
       LocalStorage.set("token", response.data.token);
       LocalStorage.set("permissions", response.data.permissions);
       LocalStorage.set("sessionDuration", response.data.sessionDuration);
       LocalStorage.set("role", response.data.role);
+
+      setSessionTimeout(response.data.sessionDuration);
 
       Notify.create({
         message: "Ingresó correctamente",
@@ -109,7 +114,6 @@ const handleLogin = async () => {
         timeout: 3000,
       });
       router.push("/inicio");
-      // router.push("/admin");
     } else {
       Notify.create({
         message: "Credenciales inválidas",
