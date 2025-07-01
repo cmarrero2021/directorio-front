@@ -42,6 +42,18 @@ const routes = [
     ],
   },
   {
+    path: "/permisos",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: { requiresAuth: false },
+    children: [
+      {
+        path: "",
+        component: () =>
+          import("pages/revistas_private/seguridad/PermisosPage.vue"),
+      },
+    ],
+  },
+  {
     path: "/:catchAll(.*)*",
     component: () => import("layouts/InitialLayout.vue"),
   },

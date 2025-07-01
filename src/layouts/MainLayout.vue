@@ -39,13 +39,22 @@
           </q-item-section>
           <q-item-section>Revistas</q-item-section>
         </q-item>
+        <q-item clickable v-ripple to="/permisos">
+          <q-item-section avatar>
+            <q-icon name="verified_user" />
+            <!-- Icono alusivo a permisos -->
+          </q-item-section>
+          <q-item-section>Permisos</q-item-section>
+        </q-item>
 
         <!-- Agrega más items según los permisos -->
       </q-list>
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <q-page class="q-pa-md">
+        <router-view />
+      </q-page>
     </q-page-container>
   </q-layout>
 </template>
